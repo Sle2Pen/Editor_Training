@@ -14,9 +14,15 @@ void (*Delete_text_buffer)(TextBuffer_t);
 
 int main(void) {
   int result = 0;
+  int line_counter = 0;
+  int is_new_line = 0;
+  int continue_work_flag = 1;
+  char answer = 0;
+  char enter = 0;
+  char file_name[1024] = {'\0'};
+  char curernt_character = 0;
 
-  TextBuffer_t file_buffer_1 = NULL;
-  TextBuffer_t file_buffer_2 = NULL;
+  TextBuffer_t file_buffer = NULL;
 
   Create_text_buffer = NULL;
   Get_Character_from_text_buffer = NULL;
@@ -38,49 +44,63 @@ int main(void) {
 
     printf(
         ".so pointer = %p\n\tcreation ptr = "
-        "%p\n\tget char ptr = %p\n\tinsertion ptr = %p\n\tdeletion ptr = %p\n",
+        "%p\n\tget char ptr = %p\n\tinsertion ptr = %p\n\tdeletion ptr = "
+        "%p\n\n",
         buffer_extension_pointer, Create_text_buffer,
         Get_Character_from_text_buffer, Insert_in_text_buffer,
         Delete_text_buffer);
 
-    file_buffer_1 = Create_text_buffer(0);
+    while (continue_work_flag) {
+      printf("\n\nDo you want to read file (y/n)?\n");
+      scanf("%c", &answer);
 
-    Load_file(file_buffer_1, "main.c");
+      if (answer == 'y' || answer == 'Y') {
+        printf("Please enter correct filepath...\n");
+        if (scanf("%1023s%c", file_name, &enter) == 2) {
+          file_buffer = Create_text_buffer(0);
 
-    printf(
-        "\nBuffer pointer :\t%p\n\tbuffer size "
-        ":\t%ld\n\tbuffer size in characters :\t%ld\n\nFile is \"main.c\"\n",
-        file_buffer_1, file_buffer_1->size, file_buffer_1->size_in_characters);
+          Load_file(file_buffer, file_name);
 
-    for (int i = 0; file_buffer_1->text[i] != -1; i++)
-      putchar((char)Get_Character_from_text_buffer(file_buffer_1, i));
+          printf(
+              "\nBuffer pointer :\t%p\n\tbuffer size "
+              ":\t%ld\n\tbuffer size in characters :\t%ld\n\nFile is "
+              "\"%s\"\n",
+              file_buffer, file_buffer->size, file_buffer->size_in_characters,
+              file_name);
 
-    putchar('\n');
+          for (int i = 0; file_buffer->text[i] != -1; i++) {
+            curernt_character =
+                (char)Get_Character_from_text_buffer(file_buffer, i);
 
-    file_buffer_2 = Create_text_buffer(0);
+            if (!i) is_new_line = 1;
 
-    Load_file(file_buffer_2, "Makefile");
+            if (is_new_line) {
+              line_counter++;
+              printf("%d\t", line_counter);
+              is_new_line = 0;
+            }
 
-    printf(
-        "\nBuffer pointer :\t%p\n\tbuffer size "
-        ":\t%ld\n\tbuffer size in characters :\t%ld\n\nFile is "
-        "\"Makefile\"\n",
-        file_buffer_2, file_buffer_2->size, file_buffer_2->size_in_characters);
+            if (curernt_character == '\n') is_new_line = 1;
 
-    for (int i = 0; file_buffer_2->text[i] != -1; i++)
-      putchar((char)Get_Character_from_text_buffer(file_buffer_2, i));
+            putchar(curernt_character);
+          }
 
-    putchar('\n');
+          putchar('\n');
 
-    Delete_text_buffer(file_buffer_1);
-    Delete_text_buffer(file_buffer_2);
+          Delete_text_buffer(file_buffer);
+          file_buffer = NULL;
+          line_counter = 0;
+        }
+      }
+
+      if (answer == 'n' || answer == 'N') continue_work_flag = 0;
+    }
 
     Create_text_buffer = NULL;
     Get_Character_from_text_buffer = NULL;
     Insert_in_text_buffer = NULL;
     Delete_text_buffer = NULL;
-    file_buffer_1 = NULL;
-    file_buffer_2 = NULL;
+    file_buffer = NULL;
 
     dlclose(buffer_extension_pointer);
     buffer_extension_pointer = NULL;
@@ -98,19 +118,12 @@ void Load_file(TextBuffer_t text_buffer, char* file_path) {
 
   int current_string_fragment[1024] = {-1};
 
-  // char current_file_path[current_path_size];
-  // memset(file_path, '\0', current_path_size);
-
-  // for (int i = 0; i < (int)current_path_size - 1; i++)
-  //   current_file_path[i] = (char)file_path[i];
-
   file_pointer = fopen(file_path, "r");
 
   if (file_path)
     while ((buffer_array[index] = fgetc(file_pointer)) != EOF) {
       if (buffer_array[index] == '\n') {
         index++;
-        // buffer_array[index] = '\0';
 
         for (int k = 0; k < index; k++)
           current_string_fragment[k] = (int)buffer_array[k];
@@ -128,7 +141,6 @@ void Load_file(TextBuffer_t text_buffer, char* file_path) {
 
   if (index) {
     index++;
-    // buffer_array[index] = '\0';
 
     for (int k = 0; k < index; k++)
       current_string_fragment[k] = (int)buffer_array[k];
