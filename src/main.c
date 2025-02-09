@@ -76,7 +76,7 @@ int main(void) {
 
             if (is_new_line) {
               line_counter++;
-              printf("%d\t", line_counter);
+              printf("\t%d\t", line_counter);
               is_new_line = 0;
             }
 

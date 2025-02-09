@@ -77,7 +77,7 @@ main :
 
 
 format :
-	clang-format -i *.c 
+	clang-format -i *.c
 #text_buffer/*.h tests/*.c tests/*.h
 
 clean : clean_objects clean_program clean_extensions
