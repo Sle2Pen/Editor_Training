@@ -102,5 +102,5 @@ clean_extensions :
 
 copy_extensions :
 	mkdir -p ../extensions/text_buffer
-	cp ../../Editor/src/text_buffer.so ../../Editor/src/text_buffer.h ../extensions/text_buffer
+	cp ../../Simple_Text_Buffer/src/text_buffer.so ../../Simple_Text_Buffer/src/text_buffer.h ../extensions/text_buffer
 	mkdir -p ../extensions/foxe_window
