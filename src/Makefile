@@ -9,7 +9,8 @@ CLIBS = -L../extensions $(LIBRARY) -Wl,-rpath,../extensions/
 CHECK_LIB = -lcheck -lrt -lm -lsubunit 
 #dlopen()
 SOURCE = main.c
-OBJECTS = main.o
+TERMINAL_BACKEND_SOURCE = Terminal_backend/Terminal_settings_manager.c
+OBJECTS = main.o terminal_settings.o
 
 EXTENSIONS_FOLDER = ../extensions
 
@@ -24,7 +25,7 @@ EXTENSIONS_FOLDER = ../extensions
 #all : clean_objects clean_gcov_files clean_report clean_library clean_tests format $(LIBRARY) test gcov_report
 all : copy_extensions clean_objects clean_program format $(PROGRAM)
 
-$(PROGRAM) : format main create_program clean_objects
+$(PROGRAM) : format terminal_settings main create_program clean_objects
 
 create_program :
 	$(CC) $(CFLAGS) -o $(PROGRAM) $(OBJECTS) 
@@ -32,6 +33,9 @@ create_program :
 
 main : 
 	$(CC) $(CFLAGS) $(INCLUDES) -c main.c -o main.o
+
+terminal_settings :
+	$(CC) $(CFLAGS) $(INCLUDES) -c Terminal_backend/Terminal_settings_manager.c -o terminal_settings.o
 
 # test : format text_buffer_checking text_create_tests text_calculate_size_tests text_copy_tests text_buffer_create_tests text_buffer_insert_from_tests text_buffer_character_from_tests $(TEST_PROGRAM) clean_objects
 # 	./$(TEST_PROGRAM)

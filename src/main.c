@@ -1,6 +1,9 @@
-#include "Document_view.h"
+//#include "Document_view.h"
+#include <unistd.h>
 
+#include "Terminal_backend/Terminal_settings_manager.h"
 //#include <dlfcn.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,6 +19,22 @@
 
 int main(void) {
   int result = 0;
+  char ascii_symbol = 0;
+
+  TSM_enable_RAW_mode();
+
+  while (read(STDIN_FILENO, &ascii_symbol, 1) == 1 && ascii_symbol != 'q') {
+    write(STDOUT_FILENO, "\x1b[2J", 4);
+    if (iscntrl(ascii_symbol)) {
+      printf("%d", ascii_symbol);
+    } else {
+      // printf("%c", ascii_symbol);
+      putchar(ascii_symbol);
+      // fputc(ascii_symbol, stdout);
+    }
+  }
+
+  TSM_disable_RAW_mode();
   // int line_counter = 0;
   // int is_new_line = 0;
   // int continue_work_flag = 1;
