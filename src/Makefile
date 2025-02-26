@@ -3,16 +3,16 @@ TEST_PROGRAM = FoxE_tests
 
 CC = cc
 CFLAGS = -g -Wall -Wextra -std=c11
-LIBRARY = -l:text_buffer/text_buffer
-INCLUDES = -I../extensions/text_buffer
-CLIBS = -L../extensions $(LIBRARY) -Wl,-rpath,../extensions/
+#LIBRARY = -l:text_buffer/text_buffer
+#INCLUDES = -I../extensions/text_buffer
+#CLIBS = -L../extensions $(LIBRARY) -Wl,-rpath,../extensions/
 CHECK_LIB = -lcheck -lrt -lm -lsubunit 
-#dlopen()
 SOURCE = main.c
-TERMINAL_BACKEND_SOURCE = Terminal_backend/Terminal_settings_manager.c
-OBJECTS = main.o terminal_settings.o
+TERMINAL_BACKEND_SOURCE = Terminal_backend/Terminal_settings_manager.c Terminal_backend/Terminal_render.c Terminal_backend/Terminal_input_event_manager.c
+TERMINAL_FRONTEND_SOURCE = Terminal_frontend/TPF.c
+OBJECTS = main.o terminal_settings.o terminal_render.o terminal_events.o tpf.o
 
-EXTENSIONS_FOLDER = ../extensions
+#EXTENSIONS_FOLDER = ../extensions
 
 # TEST_SOURCE = tests/text_buffer_checking.c tests/text_buffer_create_tests.c tests/text_buffer_insert_from_tests.c tests/text_buffer_character_from_tests.c tests/text_create_tests.c tests/text_calculate_size_tests.c tests/text_copy_tests.c
 # TEST_OBJECTS = text_buffer_checking.o text_buffer_create_tests.o text_buffer_insert_from_tests.o text_buffer_character_from_tests.o text_create_tests.o text_calculate_size_tests.o text_copy_tests.o
@@ -23,19 +23,31 @@ EXTENSIONS_FOLDER = ../extensions
 # BRANCHES = --rc lcov_branch_coverage=1
 
 #all : clean_objects clean_gcov_files clean_report clean_library clean_tests format $(LIBRARY) test gcov_report
-all : copy_extensions clean_objects clean_program format $(PROGRAM)
+all : clean_objects clean_program format $(PROGRAM)
 
-$(PROGRAM) : format terminal_settings main create_program clean_objects
+$(PROGRAM) : format terminal_backend terminal_frontend main create_program clean_objects
 
 create_program :
 	$(CC) $(CFLAGS) -o $(PROGRAM) $(OBJECTS) 
-#$(CLIBS)
 
 main : 
-	$(CC) $(CFLAGS) $(INCLUDES) -c main.c -o main.o
+	$(CC) $(CFLAGS) -c main.c -o main.o
+
+terminal_backend : terminal_render terminal_settings terminal_events
+
+terminal_events : 
+	$(CC) $(CFLAGS) $(INCLUDES) -c Terminal_backend/Terminal_input_event_manager.c -o terminal_events.o
+
+terminal_render : 
+	$(CC) $(CFLAGS) $(INCLUDES) -c Terminal_backend/Terminal_render.c -o terminal_render.o
 
 terminal_settings :
 	$(CC) $(CFLAGS) $(INCLUDES) -c Terminal_backend/Terminal_settings_manager.c -o terminal_settings.o
+
+terminal_frontend : tpf
+
+tpf :
+	$(CC) $(CFLAGS) -c Terminal_frontend/TPF.c -o tpf.o
 
 # test : format text_buffer_checking text_create_tests text_calculate_size_tests text_copy_tests text_buffer_create_tests text_buffer_insert_from_tests text_buffer_character_from_tests $(TEST_PROGRAM) clean_objects
 # 	./$(TEST_PROGRAM)
@@ -100,11 +112,3 @@ clean_objects :
 
 clean_program :
 	rm -f $(PROGRAM) 
-
-clean_extensions :
-	rm -rf ../extensions/*
-
-copy_extensions :
-	mkdir -p ../extensions/text_buffer
-	cp ../../Simple_Text_Buffer/src/text_buffer.so ../../Simple_Text_Buffer/src/text_buffer.h ../extensions/text_buffer
-	mkdir -p ../extensions/foxe_window
