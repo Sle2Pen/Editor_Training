@@ -1,7 +1,12 @@
 #include "TPF.h"
+#include "../Terminal_backend/Terminal_render.h"
 #include <stdlib.h>
 
-void Draw(TerminalWiget_t* terminal_wiget);
+void Wiget_Draw(TerminalWiget_t* terminal_wiget){
+    //terminal_wiget->wiget_area.or
+    ScreenBuffer_t buffer={0};
+    //if(terminal_wiget->
+}
 
 TerminalWiget_t* Wiget_create(){
     TerminalWiget_t* result_wiget=NULL;

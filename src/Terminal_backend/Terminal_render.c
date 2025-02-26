@@ -7,10 +7,12 @@ void TR_clean_screen(){
     write(STDOUT_FILENO, "\x1b[H", 3);
 }
 
-void TR_on_render(){
+void TR_on_render(ScreenBuffer_t* buffer){
     //TR_clean_screen();
 }
 
 void TR_reset_screen(){
-    write(STDOUT_FILENO,"\e[0m",4);
+    write(STDOUT_FILENO, "\x1b[2J", 4);
+    write(STDOUT_FILENO, "\x1b[H", 3);
+    //write(STDOUT_FILENO,"\e[0m",4);
 }

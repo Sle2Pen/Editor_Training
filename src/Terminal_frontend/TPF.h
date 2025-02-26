@@ -23,7 +23,7 @@ typedef struct terminal_wiget{
     Rectangle_t wiget_area;
 }TerminalWiget_t;
 
-void Draw(TerminalWiget_t*);
+void Wiget_Draw(TerminalWiget_t*);
 TerminalWiget_t* Wiget_create();
 void Wiget_delete(TerminalWiget_t*);
 void Wiget_set_width(TerminalWiget_t*,int);

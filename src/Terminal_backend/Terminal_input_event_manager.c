@@ -1,6 +1,7 @@
 #include "Terminal_input_event_manager.h"
 #include "Terminal_settings_manager.h"
 #include "Terminal_render.h"
+#include "../Terminal_frontend/TPF.h"
 #include <unistd.h>
 #include <ctype.h>
 
@@ -79,6 +80,8 @@ static int TIEM_handle_incoming_event(IncomingEvent_t *incoming_event,char* str,
 }
 
 void TIEM_init_event_listening(){
+    TerminalWiget_t *window=NULL;
+    TerminalWiget_t *editor_panel=NULL;
     struct winsize window_size;
     int result=0;
     IncomingEvent_t incoming_event={.event_type=INCOMING_KEYBOARD_EVENT,.key=-1};
@@ -91,10 +94,22 @@ void TIEM_init_event_listening(){
     if(!result){
         TR_clean_screen();
 
+        window=Wiget_create();
+        Wiget_set_width(window,window_size.ws_col);
+        Wiget_set_height(window,window_size.ws_row);
+
+        editor_panel=Wiget_create();
+        Wiget_set_width(editor_panel,window_size.ws_col-2);
+        Wiget_set_height(editor_panel,window_size.ws_row-2);
+
+        window->child=editor_panel;
+
         printf("\rresult = %d\r\nwindow size:\r\n\twidth = %d\r\n\theight = %d\r\n\n",result,window_size.ws_col,window_size.ws_row);
         
         while(is_should_continue){
             TIEM_listen_input_event(&incoming_event);
+
+            Wiget_Draw(window);
 
             if(incoming_event.key!=-1)
                 is_should_continue=TIEM_handle_incoming_event(&incoming_event,str,&str_length);
@@ -103,6 +118,9 @@ void TIEM_init_event_listening(){
             
             
         }
+
+        Wiget_delete(editor_panel);
+        Wiget_delete(window);
     }
 
 }

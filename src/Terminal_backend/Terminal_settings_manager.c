@@ -31,7 +31,7 @@ void TSM_enable_RAW_mode(){
     raw_mode.c_cflag |= (CS8);
     raw_mode.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
     raw_mode.c_cc[VMIN] = 0;
-    raw_mode.c_cc[VTIME] = 1;
+    raw_mode.c_cc[VTIME] = 0;//без задержек и запаздываний печати
 
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw_mode);
 
