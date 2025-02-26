@@ -3,10 +3,6 @@
 #include <termios.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-// typedef struct window_settings{
-//     int width;
-//     int height;
-// }WindowSettings_t;
 
 void TSM_enable_RAW_mode(void);
 void TSM_disable_RAW_mode(void);

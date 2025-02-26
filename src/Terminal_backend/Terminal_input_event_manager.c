@@ -4,7 +4,16 @@
 #include <unistd.h>
 #include <ctype.h>
 
+//for removing
 #include <stdio.h>
+#include <string.h>
+#define GREENF "\e[2;32m"
+#define BLACKF "\e[30m"
+#define BLUEF "\e[34m"
+#define REDF "\e[31m"
+
+#define GREENF_B "\e[1;32m"
+
 
 static void TIEM_listen_input_event(IncomingEvent_t *incoming_event){
     int input=0;
@@ -26,22 +35,45 @@ static void TIEM_listen_input_event(IncomingEvent_t *incoming_event){
     
 }
 
-static int TIEM_handle_incoming_event(IncomingEvent_t *incoming_event){
+static int TIEM_handle_incoming_event(IncomingEvent_t *incoming_event,char* str,size_t *str_length){
     char exit=0x1f & 'q';
+    char buffer[1024]={0};
+    size_t buffer_length=0;
 
     char* event_type="Incoming key press event";
     int result=1;
+    
     if(incoming_event->key==exit){
         result=0;
-        TR_clean_screen();
-    }
+        TR_reset_screen();
+    }else{
 
-    printf("event data:\r\n\tcharacter type = %s\r\n\tkey = %d\r\n\tevent type = %s",(incoming_event->key_type==TEXT)?"TEXT":"CONTROL",incoming_event->key,event_type);
-    
-    if(incoming_event->key_type==TEXT)
-        printf("\r\n\tkey char = '%c'",incoming_event->key);
-    
-    printf("\r\n\n");
+
+        if(incoming_event->key_type==TEXT){
+            buffer[0]=incoming_event->key;
+            buffer[1]='\0';
+            buffer_length=1;
+            //sprintf(buffer,"%sevent data:\r\n\t%scharacter type %s= %s\r\n\t%skey %s= %d\r\n\t%sevent type %s= %s\r\n\t%skey char %s= %s'%c'%s\r\n",BLUEF,GREENF,BLACKF,"TEXT",GREENF,BLACKF,incoming_event->key,GREENF,BLACKF,event_type,GREENF,BLACKF,REDF,incoming_event->key,BLACKF);
+        }
+
+        if(incoming_event->key_type==CONTROL){
+            if(incoming_event->key==13){
+                buffer[0]='\r';
+                buffer[1]='\n';
+                buffer[2]='\0';
+                buffer_length=2;
+            }
+            //sprintf(buffer,"%sevent data:\r\n\t%scharacter type %s= %s\r\n\t%skey %s= %d\r\n\t%sevent type %s= %s\r\n",BLUEF,GREENF,BLACKF,"TEXT",GREENF,BLACKF,incoming_event->key,GREENF,BLACKF,event_type,GREENF,BLACKF);
+        }   
+
+        if((*str_length+buffer_length)<=4095){
+            strncat(str,buffer,buffer_length);
+            *str_length+=buffer_length;
+
+            TR_clean_screen();
+            write(STDOUT_FILENO,str,*str_length);
+        }
+    }
 
     return result;
 }
@@ -51,6 +83,8 @@ void TIEM_init_event_listening(){
     int result=0;
     IncomingEvent_t incoming_event={.event_type=INCOMING_KEYBOARD_EVENT,.key=-1};
     int is_should_continue=1;
+    char str[4096]={0};
+    size_t str_length=0;
     
     result=TSM_obtain_window_settings(&window_size);
 
@@ -63,7 +97,7 @@ void TIEM_init_event_listening(){
             TIEM_listen_input_event(&incoming_event);
 
             if(incoming_event.key!=-1)
-                is_should_continue=TIEM_handle_incoming_event(&incoming_event);
+                is_should_continue=TIEM_handle_incoming_event(&incoming_event,str,&str_length);
 
             incoming_event.key=-1;
             
